@@ -4,6 +4,12 @@
         <b-card title="Laporan Keluhan">
             <div class="float-right" style="margin-top: -40px;">
                 <b-form inline>
+                    <span
+                    @click="clearSearch"
+                    v-show="search != ''"
+                    class="fa fa-close" 
+                    style="cursor: pointer; color: #F86C6B;  position: absolute;right: 75px; top: 28px;"
+                    ></span>
                     <b-input
                     v-model="search"
                     id="inline-form-input-cari"
@@ -34,7 +40,13 @@
             </template>
 
             <template slot="foto_lapor" slot-scope="row">
-                <b-img @click="modalImg(baseURL + row.value)" id="myImg" :src="baseURL + row.value" style="max-height: 100px; max-width:100px;"></b-img>
+                <b-img 
+                @click="modalImg(baseURL + row.value, row.item.desk_lapor)" 
+                id="myImg" 
+                :src="baseURL + row.value" 
+                style="max-height: 100px; max-width:100px;"
+                >
+                </b-img>
             </template>
 
             <template slot="total_komentar" slot-scope="row">
@@ -55,18 +67,46 @@
             <template slot="actions" slot-scope="row">
                 <div class="mt-3" v-show="row.item.status_lapor == 'Menunggu'">
                     <b-button-group>
-                        <b-button v-b-tooltip.hover title="Terima" class="fa fa-check" variant="success" @click="openModal('terima', row.item.id_lapor)"></b-button>
-                        <b-button v-b-tooltip.hover title="Tolak" class="fa fa-close" variant="danger" @click="openModal('tolak', row.item.id_lapor)"></b-button>
+                        <b-button 
+                        v-b-tooltip.hover 
+                        title="Terima" 
+                        class="fa fa-check" 
+                        variant="success" 
+                        @click="openModal('terima', row.item.id_lapor)"
+                        >
+                        </b-button>
+                        <b-button 
+                        v-b-tooltip.hover 
+                        title="Tolak" 
+                        class="fa fa-close" 
+                        variant="danger" 
+                        @click="openModal('tolak', row.item.id_lapor)"
+                        >
+                        </b-button>
                     </b-button-group>
                 </div>
                 <div class="mt-3" v-show="row.item.status_lapor == 'Proses'">
                     <b-button-group>
-                        <b-button v-b-tooltip.hover title="Selesai" class="fa fa-check-circle" variant="success" @click="openModal('selesai', row.item.id_lapor)"></b-button>
+                        <b-button 
+                        v-b-tooltip.hover 
+                        title="Selesai" 
+                        class="fa fa-check-circle" 
+                        variant="success" 
+                        @click="openModal('selesai', row.item.id_lapor)"
+                        >
+                        </b-button>
                     </b-button-group>
                 </div>
                 <div class="mt-3" v-show="row.item.status_lapor == 'Ditolak'">
                     <b-button-group>
-                        <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('hapus', row.item.id_lapor)"></b-button>
+                        <b-button 
+                        v-b-tooltip.hover 
+                        title="Hapus" 
+                        class="fa fa-trash" 
+                        variant="danger" 
+                        @click="openModal('hapus', row.item.id_lapor)"
+                        >
+                        </b-button>
                     </b-button-group>
                 </div>
                 
@@ -85,34 +125,98 @@
                     ></b-pagination>
                 </b-col>
             </b-row>
+            <div style="padding-top: 10px;">
+                <center>
+                <table cellpadding="0" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>      
+                            <td><b-badge variant="light">Jumlah Laporan Keluhan</b-badge></td>      
+                            <td width="30" align="center"><b>:</b></td>      
+                            <td width="60"><b-badge variant="warning">Menunggu</b-badge></td>      
+                            <td width="60"><b>:</b> <b-badge variant="default">{{totalMenunggu}}</b-badge></td>      
+                            <td width="60"><b-badge variant="primary">Proses</b-badge></td>      
+                            <td width="50"><b>:</b> <b-badge variant="default">{{totalProses}}</b-badge></td>      
+                            <td width="60"><b-badge variant="success">Selesai</b-badge></td>      
+                            <td width="40"><b>:</b> <b-badge variant="default">{{totalSelesai}}</b-badge></td>
+                            <td width="60"><b-badge variant="danger">Ditolak</b-badge></td>      
+                            <td width="40"><b>:</b> <b-badge variant="default">{{totalDitolak}}</b-badge></td>
+                        </tr>
+                        <tr>      
+                            <td><b-badge variant="light">Total Laporan Keluhan</b-badge></td>      
+                            <td align="center"><b>:</b></td>
+                            <td><b-badge variant="default">{{totalRows}}</b-badge></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </center>
+            </div>
         </b-card>
     </b-container>
-    <b-modal id="modal-1" title="Komentar" ref="modal">
+    <b-modal id="modal-1" title="Komentar" ref="modal" @ok="postComment">
         <div style="overflow-y: scroll; height:300px;">
             <div v-for="(item, index) in komentar" :key="index">
-                <div class="container">
+                <div v-if="item.id_user != admin" class="container">
+                    <b-button-group size="sm" class="float-right">
+                        <b-button 
+                        v-b-tooltip.hover 
+                        title="Hapus" 
+                        class="fa fa-trash" 
+                        variant="light"
+                        @click="openModal('hapus komentar', form.id, item.id_komentar)" 
+                        >
+                        </b-button>
+                    </b-button-group>
                     <img :src="baseURL + item.foto_user" alt="Avatar">
-                    <p>{{item.desk_komentar}}</p>
+                    <p><b>{{item.nama_user}}</b><br>{{item.desk_komentar}}</p>
                     <span class="time-right">{{timeDifference(item.tgl_komentar)}}</span>
                 </div>
 
-                <!-- <div class="container darker">
-                    <img src="/w3images/avatar_g2.jpg" alt="Avatar" class="right">
-                    <p>Hey! I'm fine. Thanks for asking!</p>
-                    <span class="time-left">11:01</span>
-                </div> -->
+                <div v-else class="container darker">
+                    <img :src="baseURL + item.foto_user" alt="Avatar" class="right">
+                    <p>{{item.desk_komentar}}</p>
+                    <span class="time-left">
+                        {{timeDifference(item.tgl_komentar)}}
+                        <b-button-group size="sm">
+                            <b-button 
+                            v-b-tooltip.hover 
+                            title="Edit" 
+                            class="fa fa-edit" 
+                            variant="default"
+                            @click="setEditKomentar(item.id_komentar, item.desk_komentar)" 
+                            >
+                            </b-button>
+                            <b-button 
+                            v-b-tooltip.hover 
+                            title="Hapus" 
+                            class="fa fa-trash" 
+                            variant="default"
+                            @click="openModal('hapus komentar', form.id, item.id_komentar)" 
+                            >
+                            </b-button>
+                        </b-button-group>
+                    </span>
+                </div>
             </div>
         </div>
         <div style="padding-top: 10px;">
+            <span
+            @click="clearEditKomentar"
+            v-show="form.act == 'edit komentar'"
+            class="fa fa-close" 
+            style="cursor: pointer; color: #F86C6B;  position: absolute;right: 25px; top: 330px;"
+            ></span>
             <b-form-textarea
-            id="textarea"
-            placeholder="Enter something..."
+            id="textarea-komentar"
+            placeholder="Ketik Komentar"
+            v-model="msg"
+            required
             ></b-form-textarea>
         </div>
     </b-modal>
     <!-- Modal Actions -->
-    <b-modal okTitle='Ya' cancelTitle='Tidak' okVariant='danger' id="modal-action" title="Konfirmasi" @ok="handleOk">
-        <p class="my-4">Apakah anda yakin {{form.act}} laporan keluhan {{form.kode}}?</p>
+    <b-modal :size="form.act == 'menghapus komentar' ? 'sm' : ''" okTitle='Ya' cancelTitle='Tidak' okVariant='danger' id="modal-action" title="Konfirmasi" @ok="handleOk">
+        <p v-if="form.act == 'menghapus komentar'" class="my-4">Apakah anda yakin {{form.act}} {{idkomen}}?</p>
+        <p v-else class="my-4">Apakah anda yakin {{form.act}} {{form.kode}}?</p>
         <b-form-group v-show="form.act == 'menolak'">
             <b-form-input
                 id="msg-input"
@@ -124,16 +228,17 @@
         </b-form-group>
     </b-modal>
     <!-- Modal Img -->
-<div id="myModal" class="modal">
-  <span class="close">&times;</span>
-  <img class="modal-content" id="img01">
-  <div id="caption"></div>
-</div>
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+    </div>
 </div>
 </template>
 <script>
 import axios from '@/config/axiosConfig';
 import date from '@/mixins/dateConfig';
+import { log } from 'util';
 export default {
     data() {
         return {
@@ -158,7 +263,7 @@ export default {
             ],
             totalRows: 1,
             currentPage: 1,
-            perPage: 10,
+            perPage: 5,
             pageOptions: [5, 10, 15],
             sortBy: null,
             sortDesc: false,
@@ -167,6 +272,7 @@ export default {
 
             form: {
                 id: '',
+                user: '',
                 kode: '',
                 status: '',
                 act: '',
@@ -176,14 +282,29 @@ export default {
             search: '',
             img: null,
 
-            komentar: []
+            // komentar
+            idkomen: null,
+            msg: '',
+            admin: '',
+            komentar: [],
+
+            // count
+            totalDitolak: 0,
+            totalMenunggu: 0,
+            totalProses: 0,
+            totalSelesai: 0,
 
         }
     },
     async created() {
         try {
+            
             let baseURL = await axios().request();
             this.baseURL = baseURL.config.baseURL;
+            let decode = this.$jwt.decode();
+            this.admin = decode.userId;
+            console.log(this.admin);
+            
             this.getData();
         } catch (error) {
             console.log(error.mmessage);
@@ -195,9 +316,25 @@ export default {
             try {
                 let result = await axios().get('/lapor/getall');
                 this.items = result.data.values;
-                console.log(result.data.values);
                 // Set the initial number of items
-                this.totalRows = this.items.length
+                this.totalRows = this.items.length;
+                this.totalMenunggu = result.data.values[0].total_menunggu;
+                this.totalProses = result.data.values[0].total_proses;
+                this.totalSelesai = result.data.values[0].total_selesai;
+                this.totalDitolak = result.data.values[0].total_ditolak;
+                
+            } catch (error) {
+                console.log(error.message);
+                this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+            }
+        },
+        async getComment(id) {
+            try {
+                let result = await axios().get('/komentar/' + id);
+                this.komentar = result.data.values;
+                console.log('get comment called');
+                console.log(this.komentar);
+                
                 
             } catch (error) {
                 console.log(error.message);
@@ -211,10 +348,12 @@ export default {
             solid: true
             })
         },
-        async openModal(type, id) {
+        async openModal(type, id, idkomen) {
             try {
                 let getid = await axios().get('/lapor/getid/' + id);
                 this.form.id = getid.data.values[0].id_lapor;
+                this.form.kode = getid.data.values[0].kode_lapor;
+                this.form.user = getid.data.values[0].id_user_lapor;
                 
                 
                 if (type == 'terima') {
@@ -230,11 +369,14 @@ export default {
                     this.form.act = 'menyelesaikan'
                     this.$bvModal.show('modal-action');
                 } else if (type == 'komentar') {
-                    let result = await axios().get('/komentar/getkomen/' + id);
-                    this.komentar = result.data.values
-                    
+                    this.getComment(this.form.id);
                     this.$bvModal.show('modal-1');         
-                }          
+                } else if (type == 'hapus komentar') {
+                    this.idkomen = idkomen;
+                    
+                    this.form.act = 'menghapus komentar';
+                    this.$bvModal.show('modal-action');         
+                }       
             } catch (error) {
             console.log(error.message);
             this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
@@ -244,16 +386,35 @@ export default {
         async handleOk(e) {
           try {
               if (document.getElementById('msg-input').checkValidity() == false) {
-                  this.makeToast('Tulis pesan penolakan', 'Terjadi Kesalahan', 'danger');
+                  document.getElementById('msg-input').classList.add('is-invalid')
                   e.preventDefault();
               } else {
-                  let result = await axios().put('/lapor/status/' + this.form.id, {
-                    status: this.form.status,
-                    pesan: this.form.msg
-                  });
-                  this.form.msg = '';
-                  this.makeToast(`Berhasil ${this.form.act} ${this.form.id}`, 'Berhasil', 'success');
-                  this.getData();
+                  if (this.form.act == 'menghapus komentar') {
+                      await axios().delete('/komentar/' + this.idkomen);
+                      this.makeToast(`Berhasil ${this.form.act} ${this.idkomen}`, 'Berhasil', 'success');
+                      this.getComment(this.form.id);
+                      this.getData();
+                      this.msg = '';
+                      this.idkomen = null;
+                      console.log('delete');
+                  } else {
+                      let result = await axios().put('/lapor/status/' + this.form.id, {
+                        status: this.form.status,
+                        pesan: this.form.msg
+                      });
+                      this.form.msg = '';
+                      this.makeToast(`Berhasil ${this.form.act} ${this.form.kode}`, 'Berhasil', 'success');
+                      this.getData();
+
+                      let notif = await axios().post('/notif/', {
+                            id: this.admin,
+                            user: this.form.user,
+                            lapor: this.form.id,
+                            tipe: 'Laporan Keluhan',
+                            desk:  `Laporan ${this.form.kode} telah ${this.form.status == 'Proses' ? 'Diproses' : this.form.status}`,
+                            status: 'Aktif'
+                        });
+                  }
               }
           } catch (error) {
               this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
@@ -277,19 +438,18 @@ export default {
                 
             }
         },
-        modalImg(img) {
+        modalImg(img, desk) {
             this.img = img;
             // Get the modal
             var modal = document.getElementById("myModal");
 
             // Get the image and insert it inside the modal - use its "alt" text as a caption
-            var img = document.getElementById("myImg");
-            var modalImg = document.getElementById("img01");
-            var captionText = document.getElementById("caption");
+            let modalImg = document.getElementById("img01");
+            let captionText = document.getElementById("caption");
 
             modal.style.display = "block";
             modalImg.src = this.img;
-            captionText.innerHTML = 'this.alt';
+            captionText.innerHTML = desk;
             
 
             // Get the <span> element that closes the modal
@@ -299,6 +459,64 @@ export default {
             span.onclick = function() { 
                 modal.style.display = "none";
             }
+        },
+        async postComment(e) {
+            try {
+                if (document.getElementById('textarea-komentar').checkValidity() == false) {
+                    e.preventDefault();
+                    document.getElementById('textarea-komentar').classList.add('is-invalid')
+                } else {
+                    e.preventDefault();
+                    if (this.idkomen == null) {
+                        console.log('post');
+                        let comment = await axios().post('/komentar', {
+                            idlapor: this.form.id,
+                            desk: this.msg
+                        });
+                        this.getComment(this.form.id);
+                        this.msg = '';
+                        this.makeToast('Berhasil menambahkan komentar', 'Berhasil', 'success');
+
+                        let notif = await axios().post('/notif/', {
+                            id: this.admin,
+                            user: this.komentar[0].id_user_lapor,
+                            lapor: this.form.id,
+                            tipe: 'Komentar',
+                            desk:  `Anda mendapat komentar baru pada laporan ${this.form.kode}`,
+                            status: 'Aktif'
+                        }); 
+                    } else {
+                        this.form.act = '';
+                        console.log('put');
+                        let update = await axios().put('/komentar', {
+                            desk: this.msg,
+                            id: this.idkomen
+                        });
+                        this.getComment(this.form.id);
+                        this.msg = '';
+                        this.idkomen = null;
+                        this.makeToast('Berhasil mengubah komentar', 'Berhasil', 'success');
+                    }
+                }
+            } catch (error) {
+                console.log(error.message);
+                this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+                
+            }
+        },
+        setEditKomentar(id, desk) {
+            this.form.act = 'edit komentar';
+            this.idkomen = id;
+            this.msg = desk;
+        },
+        clearEditKomentar() {
+            this.form.act = '';
+            this.idkomen = null;
+            this.msg = '';
+        },
+        clearSearch() {
+            this.search = '';
+            this.getData();
         }
     },
     mixins: [date]

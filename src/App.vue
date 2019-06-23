@@ -4,7 +4,33 @@
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  created(){
+    // Return true / false - check if a JWT token is stored in cookies or local storage
+      this.hastoken = this.$jwt.hasToken();
+      console.log('has', this.hastoken);
+      
+      // Return token from cookies or local storage
+      let token = this.$jwt.getToken();
+      console.log('get', token);
+      
+      // Decode JWT token and return payload
+      let decode = this.$jwt.decode();
+      console.log('decode', decode);
+
+      if (decode == null) {
+        this.$router.push('/pages/login');
+        localStorage.removeItem('jwt');
+      }
+
+      if (decode.exp < Date.now() / 1000) {
+        localStorage.removeItem('jwt');
+        this.$router.push('/pages/login');
+      } else {
+        console.log('token valid');
+        
+      }
+  }
 }
 </script>
 

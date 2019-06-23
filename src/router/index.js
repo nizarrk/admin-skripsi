@@ -72,7 +72,7 @@ const SurveyHasil = () => import('@/views/survey/survey-hasil');
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'hash', // https://router.vuejs.org/api/#mode
   linkActiveClass: 'open active',
   scrollBehavior: () => ({ y: 0 }),
@@ -86,7 +86,8 @@ export default new Router({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: Dashboard
+          component: Dashboard,
+          meta: { requiresAuth: true }
         },
         {
           path: 'layanan',
@@ -106,19 +107,22 @@ export default new Router({
                 {
                   path: 'data',
                   name: 'Data',
-                  component: Lapor
+                  component: Lapor,
+                  meta: { requiresAuth: true }
                 },
                 {
                   path: 'map',
                   name: 'Map',
-                  component: LaporMap
+                  component: LaporMap,
+                  meta: { requiresAuth: true }
                 },
               ]
             },
             {
               path: 'izin',
               name: 'Izin',
-              component: Izin
+              component: Izin,
+              meta: { requiresAuth: true }
             }
           ]
         },
@@ -133,17 +137,20 @@ export default new Router({
             {
               path: 'berita',
               name: 'Berita',
-              component: Info
+              component: Info,
+              meta: { requiresAuth: true }
             },
             {
               path: 'trayek',
               name: 'Trayek',
-              component: Trayek
+              component: Trayek,
+              meta: { requiresAuth: true }
             },
             {
               path: 'parkir',
               name: 'Parkir',
-              component: Parkir
+              component: Parkir,
+              meta: { requiresAuth: true }
             },
           ]
         },
@@ -158,24 +165,28 @@ export default new Router({
             {
               path: 'master',
               name: 'Master',
-              component: SurveyMaster
+              component: SurveyMaster,
+              meta: { requiresAuth: true }
             },
             {
               path: 'data',
               name: 'Data',
-              component: Survey
+              component: Survey,
+              meta: { requiresAuth: true }
             },
             {
               path: 'hasil',
               name: 'Hasil',
-              component: SurveyHasil
+              component: SurveyHasil,
+              meta: { requiresAuth: true }
             },
           ]
         },
         {
           path: 'kritik',
           name: 'Kritik & Saran',
-          component: Kritik
+          component: Kritik,
+          meta: { requiresAuth: true }
         },
         {
           path: 'icons',
@@ -326,8 +337,59 @@ export default new Router({
               component: BrandButtons
             }
           ]
+        }
+      ]
+    },
+    {
+      path: '/pages',
+      redirect: '/pages/404',
+      name: 'Pages',
+      component: {
+        render (c) { return c('router-view') }
+      },
+      children: [
+        {
+          path: '404',
+          name: 'Page404',
+          component: Page404
         },
+        {
+          path: '500',
+          name: 'Page500',
+          component: Page500
+        },
+        {
+          path: 'login',
+          name: 'Login',
+          component: Login
+        },
+        {
+          path: 'register',
+          name: 'Register',
+          component: Register
+        }
       ]
     }
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // this route requires auth, check if logged in
+    // if not, redirect to login page.
+    if (localStorage.getItem('jwt') == null) {
+      next({
+        path: '/pages/login',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      // let base64Url = localStorage.getItem('jwt').split('.')[1];
+      // let decodedValue = JSON.parse(window.atob(base64Url));
+      next()
+    }
+  } else {
+    next() // make sure to always call next()!
+  }
+})
+
+ export default router

@@ -7,25 +7,32 @@
         <img class="navbar-brand-minimized" src="img/brand/sygnet.svg" width="30" height="30" alt="CoreUI Logo">
       </b-link>
       <SidebarToggler class="d-md-down-none" display="lg" />
-      <b-navbar-nav class="d-md-down-none">
-        <b-nav-item class="px-3" to="/dashboard">Dashboard</b-nav-item>
-        <b-nav-item class="px-3" to="/users" exact>Users</b-nav-item>
-        <b-nav-item class="px-3">Settings</b-nav-item>
-      </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-nav-item class="d-md-down-none">
-          <i class="icon-bell"></i>
-          <b-badge pill variant="danger">5</b-badge>
-        </b-nav-item>
-        <b-nav-item class="d-md-down-none">
-          <i class="icon-list"></i>
-        </b-nav-item>
-        <b-nav-item class="d-md-down-none">
-          <i class="icon-location-pin"></i>
+          <b-dropdown size="lg"  variant="link" toggle-class="text-decoration-none" no-caret>
+            <template slot="button-content">
+              <i class="icon-bell"></i>
+              <b-badge pill variant="danger">5</b-badge>
+            </template>
+            <div style="width: 400px;">
+              <b-list-group>
+                <b-list-group-item href="#" class="flex-column align-items-start">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">List group item heading</h5>
+                    <small>3 days ago</small>
+                  </div>
+                  <p class="mb-1">
+                    Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
+                  </p>
+                  <small>Donec id elit non mi porta.</small>
+                </b-list-group-item>
+                
+              </b-list-group>
+              </div>
+          </b-dropdown>
         </b-nav-item>
         <DefaultHeaderDropdownAccnt/>
       </b-navbar-nav>
-      <AsideToggler class="d-none d-lg-block" />
       <!--<AsideToggler class="d-lg-none" mobile />-->
     </AppHeader>
     <div class="app-body">
@@ -42,10 +49,6 @@
           <router-view></router-view>
         </div>
       </main>
-      <AppAside fixed>
-        <!--aside-->
-        <DefaultAside/>
-      </AppAside>
     </div>
     <TheFooter>
       <!--footer-->
@@ -97,6 +100,9 @@ export default {
     list () {
       return this.$route.matched.filter((route) => route.name || route.meta.label )
     }
+  },
+  created() {
+    
   }
 }
 </script>

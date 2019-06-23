@@ -6,7 +6,7 @@
             <!-- Main table element -->
             <b-table
             show-empty
-            stacked="md"
+            responsive
             :items="items"
             :fields="fields"
             :current-page="currentPage"
@@ -20,24 +20,31 @@
                 {{ row.index + 1}}
             </template>
 
-            <template slot="actions" slot-scope="row">
-                <div class="mt-3" v-show="row.item.status_izin == 'Menunggu'">
-                    <b-button-group>
-                        <b-button v-b-tooltip.hover title="Terima" class="fa fa-check" variant="success" @click="openModal('terima', row.item.id_izin)"></b-button>
-                        <b-button v-b-tooltip.hover title="Tolak" class="fa fa-close" variant="danger" @click="openModal('tolak', row.item.id_izin)"></b-button>
-                    </b-button-group>
+            <template slot="nrr" slot-scope="row">
+                {{ (row.item.jumlah_point / totalSurvey).toFixed(2) }}
+            </template>
+
+            <template slot="nrr_tertimbang" slot-scope="row">
+                {{ ((row.item.jumlah_point / totalSurvey) * 0.11).toFixed(2) }}
+            </template>
+
+            <template slot="hasil" slot-scope="row">
+                {{ ((row.item.jumlah_point / totalSurvey) * 25).toFixed(2) }}
+            </template>
+
+            <template slot="ket" slot-scope="row">
+                <div v-if="(row.item.jumlah_point / totalSurvey) * 25 < 65">
+                    Tidak Baik
                 </div>
-                <div class="mt-3" v-show="row.item.status_izin == 'Proses'">
-                    <b-button-group>
-                        <b-button v-b-tooltip.hover title="Selesai" class="fa fa-check-circle" variant="success" @click="openModal('selesai', row.item.id_izin)"></b-button>
-                    </b-button-group>
+                <div v-else-if="(row.item.jumlah_point / totalSurvey) * 25 < 76.61">
+                    Kurang Baik
                 </div>
-                <div class="mt-3" v-show="row.item.status_izin == 'Ditolak'">
-                    <b-button-group>
-                        <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('hapus', row.item.id_izin)"></b-button>
-                    </b-button-group>
+                <div v-else-if="(row.item.jumlah_point / totalSurvey) * 25 < 88.31">
+                    Baik
                 </div>
-                
+                <div v-else>
+                    Sangat Baik
+                </div>
             </template>
 
             </b-table>
@@ -52,14 +59,37 @@
                     ></b-pagination>
                 </b-col>
             </b-row>
+            <div style="padding-top: 10px;">
+                    <center>
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tbody>
+                            <tr>      
+                                <td><b-badge variant="light">Total Survey Masuk</b-badge></td>      
+                                <td align="center"><b>:</b></td>
+                                <td><b-badge variant="default">{{totalSurvey}}</b-badge></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </center>
+                </div>
         </b-card>
+        <!-- <b-card>         
+            <mdb-container v-for="(item, index) in pieChartData" :key="index">
+                <mdb-pie-chart :data="pieChartData[index]" :options="pieChartOptions" :width="600" :height="300"></mdb-pie-chart>
+            </mdb-container>
+        </b-card> -->
     </b-container>
 </div>
 </template>
 
 <script>
+import { mdbPieChart, mdbContainer } from 'mdbvue';
 import axios from '@/config/axiosConfig';
 export default {
+    components: {
+      mdbPieChart,
+      mdbContainer
+    },
     data() {
         return {
             baseURL: '',
@@ -67,11 +97,15 @@ export default {
             fields: [
                 { key: 'no', label: 'No.', sortDirection: 'desc' },
                 { key: 'pertanyaan_survey', label: 'Pertanyaan' },
-                { key: 'jawaban1', label: 'Jawaban A'},
-                { key: 'jawaban2', label: 'Jawaban B'},
-                { key: 'jawaban3', label: 'Jawaban C'},
-                { key: 'jawaban4', label: 'Jawaban D'},
-                { key: 'actions', label: 'Actions' }
+                { key: 'point_jawaban1', label: 'Jawaban A'},
+                { key: 'point_jawaban2', label: 'Jawaban B'},
+                { key: 'point_jawaban3', label: 'Jawaban C'},
+                { key: 'point_jawaban4', label: 'Jawaban D'},
+                { key: 'jumlah_point', label: 'Jumlah' },
+                { key: 'nrr', label: 'NRR' },
+                { key: 'nrr_tertimbang', label: 'NRR Tertimbang' },
+                { key: 'hasil', label: 'Hasil' },
+                { key: 'ket', label: 'Keterangan' }
             ],
             totalRows: 1,
             currentPage: 1,
@@ -81,6 +115,19 @@ export default {
             sortDesc: false,
             sortDirection: 'asc',
             filter: null,
+
+            // survey
+            totalSurvey: 0,
+            jwb1: 0,
+            jwb2: 0,
+            jwb3: 0,
+            jwb4: 0,
+
+            pieChartData: [],
+            pieChartOptions: {
+                responsive: false,
+                maintainAspectRatio: false
+            }
         }
     },
     async created() {
@@ -94,15 +141,28 @@ export default {
     methods: {
         async getData() {
             try {
-                let result = await axios().get('/survey/soal');
-                
-                result.data.values.map(async e => {
-                    let jwb = await axios().get('/survey/jwb/' + e.id_pertanyaan_survey);
-                    console.log(jwb.data.values);
+                let result = await axios().get('/survey/hasil');
+                this.items = result.data.values;
+                this.totalSurvey = result.data.values[0].total_jawaban1 + result.data.values[0].total_jawaban2 + result.data.values[0].total_jawaban3 + result.data.values[0].total_jawaban4               
+                for (let i = 0; i < this.items.length; i++) {
+                    let a = this.items[i].total_jawaban1;
+                    let b = this.items[i].total_jawaban2;
+                    let c = this.items[i].total_jawaban3;
+                    let d = this.items[i].total_jawaban4;
+                    this.pieChartData.push({
+                        labels: ["Jawaban A", "Jawaban B", "Jawaban C", "Jawaban D"],
+                        datasets: [
+                            {
+                            data: [a, b, c, d],
+                            backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1"],
+                            hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5"]
+                            }
+                        ]
+                    })
                     
-                })
-                
-
+                    
+                }
+                console.log(this.items);
                 // Set the initial number of items
                 this.totalRows = this.items.length
             } catch (error) {

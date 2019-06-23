@@ -31,7 +31,7 @@ export default {
         {
           name: 'Map',
           url: '/layanan/keluhan/map',
-          icon: 'icon-cursor'
+          icon: 'icon-map'
         }
       ]
     },
@@ -84,12 +84,12 @@ export default {
         {
           name: 'Survey',
           url: '/survey/data',
-          icon: 'icon-cursor'
+          icon: 'fa fa-file'
         },
         {
           name: 'Hasil',
           url: '/survey/hasil',
-          icon: 'icon-cursor'
+          icon: 'fa fa-folder'
         }
       ]
     },

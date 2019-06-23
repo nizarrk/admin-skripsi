@@ -24,8 +24,22 @@
           <template slot="actions" slot-scope="row">
             <div class="mt-3">
               <b-button-group>
-                <b-button v-b-tooltip.hover title="Edit" class="fa fa-edit" variant="warning" @click="openModal('edit', row.item.id_pertanyaan_survey, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"></b-button>
-                <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('del', row.item.id_pertanyaan_survey)"></b-button>
+                <b-button 
+                v-b-tooltip.hover 
+                title="Edit" 
+                class="fa fa-edit" 
+                variant="warning" 
+                @click="openModal('edit', row.item.id_pertanyaan_survey, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"
+                >
+                </b-button>
+                <b-button 
+                v-b-tooltip.hover 
+                title="Hapus" 
+                class="fa fa-trash" 
+                variant="danger" 
+                @click="openModal('del', row.item.id_pertanyaan_survey)"
+                >
+                </b-button>
               </b-button-group>
             </div>
           </template>

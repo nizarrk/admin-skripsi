@@ -71,6 +71,31 @@
                         ></b-pagination>
                     </b-col>
                 </b-row>
+                <div style="padding-top: 10px;">
+                    <center>
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tbody>
+                            <tr>      
+                                <td><b-badge variant="light">Jumlah Izin Penggunaan Jalan</b-badge></td>      
+                                <td width="30" align="center"><b>:</b></td>      
+                                <td width="60"><b-badge variant="warning">Menunggu</b-badge></td>      
+                                <td width="60"><b>:</b> <b-badge variant="default">{{totalMenunggu}}</b-badge></td>      
+                                <td width="60"><b-badge variant="primary">Proses</b-badge></td>      
+                                <td width="50"><b>:</b> <b-badge variant="default">{{totalProses}}</b-badge></td>      
+                                <td width="60"><b-badge variant="success">Selesai</b-badge></td>      
+                                <td width="40"><b>:</b> <b-badge variant="default">{{totalSelesai}}</b-badge></td>
+                                <td width="60"><b-badge variant="danger">Ditolak</b-badge></td>      
+                                <td width="40"><b>:</b> <b-badge variant="default">{{totalDitolak}}</b-badge></td>
+                            </tr>
+                            <tr>      
+                                <td><b-badge variant="light">Total Izin Penggunaan Jalan</b-badge></td>      
+                                <td align="center"><b>:</b></td>
+                                <td><b-badge variant="default">{{totalRows}}</b-badge></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </center>
+                </div>
             </b-card>
         </b-container>
         <!-- Modal Lampiran -->
@@ -141,15 +166,25 @@ export default {
 
             form: {
                 id: '',
+                admin: '',
+                user: '',
                 kode: '',
                 status: '',
                 act: '',
                 msg: null
-            }
+            },
+
+            // count
+            totalDitolak: 0,
+            totalMenunggu: 0,
+            totalProses: 0,
+            totalSelesai: 0
         }
     },
     async created() {
         try {
+            let decode = this.$jwt.decode();
+            this.form.admin = decode.userId;
             let baseURL = await axios().request();
             this.baseURL = baseURL.config.baseURL;
             this.getData()
@@ -163,6 +198,10 @@ export default {
             try {
                 let result = await axios().get('/izin/getall');
                 this.items = result.data.values;
+                this.totalMenunggu = result.data.values[0].total_menunggu;
+                this.totalProses = result.data.values[0].total_proses;
+                this.totalSelesai = result.data.values[0].total_selesai;
+                this.totalDitolak = result.data.values[0].total_ditolak;
 
                 // Set the initial number of items
                 this.totalRows = this.items.length
@@ -176,6 +215,7 @@ export default {
                 let result = await axios().get('/izin/getall/' + id);
                 this.form.id = result.data.values[0].id_izin;
                 this.form.kode = result.data.values[0].kode_izin;
+                this.form.user = result.data.values[0].id_user_izin;
                 
                 console.log(result);
                 if (type == 'terima') {
@@ -220,6 +260,15 @@ export default {
                   this.form.msg = '';
                   this.makeToast(`Berhasil ${this.form.act} ${this.form.id}`, 'Berhasil', 'success');
                   this.getData();
+
+                  let notif = await axios().post('/notif/', {
+                            id: this.form.admin,
+                            user: this.form.user,
+                            lapor: this.form.id,
+                            tipe: 'Izin Penggunaan Jalan',
+                            desk:  `Izin Penggunaan Jalan ${this.form.kode} telah ${this.form.status == 'Proses' ? 'Diproses' : this.form.status}`,
+                            status: 'Aktif'
+                        });
               }
           } catch (error) {
               this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');

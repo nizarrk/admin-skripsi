@@ -27,13 +27,15 @@
     "flag-icon-css": "^3.3.0",
     "font-awesome": "^4.7.0",
     "leaflet": "^1.5.1",
+    "mdbvue": "^5.5.0",
     "perfect-scrollbar": "^1.4.0",
     "simple-line-icons": "^2.4.1",
     "vue": "^2.6.10",
     "vue-chartjs": "^3.4.2",
     "vue-perfect-scrollbar": "^0.1.0",
     "vue-router": "^3.0.2",
-    "vue2-leaflet": "^2.1.1"
+    "vue2-leaflet": "^2.1.1",
+    "vuejs-jwt": "^1.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.5",

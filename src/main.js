@@ -11,6 +11,12 @@ import router from './router'
 // Import Leaflet
 import { Icon }  from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+// Import vue-jwt
+import VueJWT from 'vuejs-jwt'
+const options = {
+  keyName: 'jwt' 
+};
+Vue.use(VueJWT, options);
 
 // todo
 // cssVars()
