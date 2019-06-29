@@ -2,7 +2,7 @@
 <div class="animated fadeIn">
   <b-container fluid>
     <b-card title="Daftar Pertanyaan">
-      <b-button class="float-right" variant="success" @click="addAll">Tambah Semua ke Survey</b-button><br>
+      <b-button style="margin-bottom: 5px;" class="float-right" variant="success" @click="addAll">Tambah Semua ke Survey</b-button><br>
         <!-- Main table element -->
         <b-table
         show-empty
@@ -24,9 +24,27 @@
           <template slot="actions" slot-scope="row">
             <div class="mt-3">
                 <b-button-group>
-                  <b-button class="fa fa-plus-square-o" variant="success" @click="openModal('add', row.item.id_pertanyaan, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"></b-button>
-                  <b-button class="fa fa-edit" variant="warning" @click="openModal('edit', row.item.id_pertanyaan, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"></b-button>
-                  <b-button class="fa fa-trash" variant="danger" @click="openModal('del', row.item.id_pertanyaan)"></b-button>
+                  <b-button 
+                  class="fa fa-plus-square-o" 
+                  variant="success" 
+                  @click="openModal('add', row.item.id_pertanyaan, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"
+                  v-b-tooltip.hover 
+                  title="Tambah"
+                  ></b-button>
+                  <b-button 
+                  class="fa fa-edit" 
+                  variant="warning" 
+                  @click="openModal('edit', row.item.id_pertanyaan, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"
+                  v-b-tooltip.hover 
+                  title="Edit"
+                  ></b-button>
+                  <b-button 
+                  class="fa fa-trash" 
+                  variant="danger" 
+                  @click="openModal('del', row.item.id_pertanyaan)"
+                  v-b-tooltip.hover 
+                  title="Hapus"
+                  ></b-button>
                 </b-button-group>
               </div>
           </template>

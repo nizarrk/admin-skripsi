@@ -34,16 +34,16 @@
 
             <template slot="ket" slot-scope="row">
                 <div v-if="(row.item.jumlah_point / totalSurvey) * 25 < 65">
-                    Tidak Baik
+                    <b-badge variant="danger">Tidak Baik</b-badge>
                 </div>
                 <div v-else-if="(row.item.jumlah_point / totalSurvey) * 25 < 76.61">
-                    Kurang Baik
+                    <b-badge variant="warning">Kurang Baik</b-badge>
                 </div>
                 <div v-else-if="(row.item.jumlah_point / totalSurvey) * 25 < 88.31">
-                    Baik
+                    <b-badge variant="primary">Baik</b-badge>
                 </div>
                 <div v-else>
-                    Sangat Baik
+                    <b-badge variant="success">Sangat Baik</b-badge>
                 </div>
             </template>
 

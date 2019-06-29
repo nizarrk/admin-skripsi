@@ -1,16 +1,16 @@
 <template>
     <div class="animated fadeIn">
         <b-container fluid>
-            <b-button variant="success" @click="openModal('add')">Tambah Trayek</b-button><br>
+            <b-button style="margin-bottom: 5px;" variant="success" @click="openModal('add')">Tambah Trayek</b-button>
             <b-card v-for="(item, index) in items" :key="index" :title="item.nama_trayek" :sub-title="'Jarak: ' + item.jarak_trayek + ' KM' ">
                 <b-card-text>
                     {{item.rute_trayek}}
                 </b-card-text>
                 <div class="mt-3">
                     <b-button-group>
-                      <b-button class="fa fa-map" variant="info" @click="openModal('see', item.id_trayek)"></b-button>
-                      <b-button class="fa fa-edit" variant="warning" @click="openModal('edit', item.id_trayek)"></b-button>
-                      <b-button class="fa fa-trash" variant="danger" @click="openModal('del', item.id_trayek)"></b-button>
+                      <b-button v-b-tooltip.hover title="Map" class="fa fa-map" variant="info" @click="openModal('see', item.id_trayek)"></b-button>
+                      <b-button v-b-tooltip.hover title="Edit" class="fa fa-edit" variant="warning" @click="openModal('edit', item.id_trayek)"></b-button>
+                      <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('del', item.id_trayek)"></b-button>
                     </b-button-group>
                 </div>
             </b-card>
@@ -212,7 +212,7 @@ export default {
                   this.$refs.modal.hide()
               })
               
-              this.makeToast(`Berhasil mengubah pertanyaan ${this.form.id}`, 'Berhasil', 'success');
+              this.makeToast(`Berhasil mengubah trayek ${this.form.id}`, 'Berhasil', 'success');
               this.getData();
               } else if (type = 'add') {
                 await axios().post('/info/trayek', {
@@ -225,7 +225,7 @@ export default {
                 this.$nextTick(() => {
                     this.$refs.modal.hide()
                 })
-                this.makeToast(`Berhasil menambah pertanyaan ${this.form.id}`, 'Berhasil', 'success');
+                this.makeToast(`Berhasil menambah trayek ${this.form.id}`, 'Berhasil', 'success');
                 this.getData();
               }
             } catch (error) {

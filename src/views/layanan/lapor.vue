@@ -97,7 +97,7 @@
                         </b-button>
                     </b-button-group>
                 </div>
-                <div class="mt-3" v-show="row.item.status_lapor == 'Ditolak'">
+                <!-- <div class="mt-3" v-show="row.item.status_lapor == 'Ditolak'">
                     <b-button-group>
                         <b-button 
                         v-b-tooltip.hover 
@@ -108,7 +108,7 @@
                         >
                         </b-button>
                     </b-button-group>
-                </div>
+                </div> -->
                 
             </template>
 
@@ -409,7 +409,7 @@ export default {
                       let notif = await axios().post('/notif/', {
                             id: this.admin,
                             user: this.form.user,
-                            lapor: this.form.id,
+                            kode: this.form.id,
                             tipe: 'Laporan Keluhan',
                             desk:  `Laporan ${this.form.kode} telah ${this.form.status == 'Proses' ? 'Diproses' : this.form.status}`,
                             status: 'Aktif'

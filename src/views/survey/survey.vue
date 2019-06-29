@@ -2,7 +2,7 @@
 <div class="animated fadeIn">
   <b-container fluid>
     <b-card title="Pertanyaan Survey">
-      <b-button class="float-right" variant="danger" @click="deleteAll">Hapus Semua Survey</b-button><br>
+      <b-button style="margin-bottom: 5px;" class="float-right" variant="danger" @click="deleteAll">Hapus Semua Survey</b-button><br>
         <!-- Main table element -->
         <b-table
         show-empty

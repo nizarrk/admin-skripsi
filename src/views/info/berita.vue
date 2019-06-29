@@ -1,6 +1,6 @@
 <template>
 <div class="animated fadeIn">
-    <b-button variant="success" @click="openModal('add')">Tambah Info</b-button><br>
+    <b-button style="margin-bottom: 5px;" variant="success" @click="openModal('add')">Tambah Info</b-button><br>
     <b-card v-show="items.length == 0"><center> Tidak ada data </center></b-card>
     <b-row v-for="(article, index) in groupedArticles" :key="index">
         <b-col v-for="(item, index) in items.slice(index * 3, (index + 1) * 3)" :key="index">

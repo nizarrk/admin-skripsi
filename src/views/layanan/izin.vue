@@ -51,11 +51,11 @@
                             <b-button v-b-tooltip.hover title="Selesai" class="fa fa-check-circle" variant="success" @click="openModal('selesai', row.item.id_izin)"></b-button>
                         </b-button-group>
                     </div>
-                    <div class="mt-3" v-show="row.item.status_izin == 'Ditolak'">
+                    <!-- <div class="mt-3" v-show="row.item.status_izin == 'Ditolak'">
                         <b-button-group>
                             <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('hapus', row.item.id_izin)"></b-button>
                         </b-button-group>
-                    </div>
+                    </div> -->
                     
                 </template>
 
@@ -264,7 +264,7 @@ export default {
                   let notif = await axios().post('/notif/', {
                             id: this.form.admin,
                             user: this.form.user,
-                            lapor: this.form.id,
+                            kode: this.form.id,
                             tipe: 'Izin Penggunaan Jalan',
                             desk:  `Izin Penggunaan Jalan ${this.form.kode} telah ${this.form.status == 'Proses' ? 'Diproses' : this.form.status}`,
                             status: 'Aktif'
