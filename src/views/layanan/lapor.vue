@@ -39,6 +39,10 @@
                 {{ row.index + 1}}
             </template>
 
+            <template slot="desk_lapor" slot-scope="row">
+                {{row.value | limitToDisplay(row.value)}}
+            </template>
+
             <template slot="foto_lapor" slot-scope="row">
                 <b-img 
                 @click="modalImg(baseURL + row.value, row.item.desk_lapor)" 
@@ -52,6 +56,7 @@
             <template slot="total_komentar" slot-scope="row">
                 <b-link @click="openModal('komentar', row.item.id_lapor )">Lihat<b-badge variant="light">({{row.value}})</b-badge></b-link>
             </template>
+            
 
             <template slot="status_lapor" slot-scope="row">
                 <b-badge v-show="row.value == 'Menunggu'" variant="warning">{{row.value}}</b-badge>
@@ -517,6 +522,15 @@ export default {
         clearSearch() {
             this.search = '';
             this.getData();
+        },
+    },
+    filters: {
+        limitToDisplay(text) {
+          if (text.length < 100) {
+            return text;
+          } else {
+            return text.substring(0, 100) + ' ....';
+          }            
         }
     },
     mixins: [date]
