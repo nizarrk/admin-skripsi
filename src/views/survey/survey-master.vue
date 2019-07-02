@@ -341,7 +341,7 @@ import axios from '@/config/axiosConfig';
       },
       async onSubmit() {
         try {
-          let result = await this.form.map(async (e, i) => {
+          await this.form.map(async (e, i) => {
             let pertanyaan = await axios().post('/survey', {
               pertanyaan: e.pertanyaan
             });
@@ -369,11 +369,10 @@ import axios from '@/config/axiosConfig';
             document.getElementById("form-" + [i]).reset();
             return pertanyaan
           })
-          Promise.all(result).then((res) => {
-            console.log(res);
-            this.getData(res);
-          })
-          console.log('after map');
+          setTimeout(() => {
+            this.getData();
+            console.log('after map');
+          }, 1000);
           this.makeToast('Berhasil menambahkan pertanyaan', 'Berhasil', 'success');
         } catch (error) {
           console.log(error.message);
