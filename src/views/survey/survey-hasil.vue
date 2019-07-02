@@ -117,6 +117,7 @@ export default {
             filter: null,
 
             // survey
+            totalPoint: 0,
             totalSurvey: 0,
             jwb1: 0,
             jwb2: 0,
@@ -143,6 +144,7 @@ export default {
             try {
                 let result = await axios().get('/survey/hasil');
                 this.items = result.data.values;
+                this.totalPoint = result
                 this.totalSurvey = result.data.values[0].total_jawaban1 + result.data.values[0].total_jawaban2 + result.data.values[0].total_jawaban3 + result.data.values[0].total_jawaban4               
                 for (let i = 0; i < this.items.length; i++) {
                     let a = this.items[i].total_jawaban1;

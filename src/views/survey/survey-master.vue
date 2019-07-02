@@ -350,10 +350,10 @@ import axios from '@/config/axiosConfig';
 
             let jwb = await [e.jawabanA, e.jawabanB, e.jawabanC, e.jawabanD].map(async (item, index) => {
               let kode = '';
-              if (index == 0) kode = 'A';
-              else if (index == 1) kode = 'B';
-              else if (index == 2) kode = 'C';
-              else if (index == 3) kode = 'D';
+              if (index == 0) kode = 1;
+              else if (index == 1) kode = 2;
+              else if (index == 2) kode = 3;
+              else if (index == 3) kode = 4;
               let jawaban = await axios().post('/survey/jawaban', {
                 id: pertanyaan.data.values.insertId,
                 jawaban: item,

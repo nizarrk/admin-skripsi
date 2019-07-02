@@ -29,6 +29,9 @@
                   <small>{{item.desk_notifikasi}}</small>
                 </div>
               </b-dropdown-item>
+              <b-link id="all" @click="getAll">
+                Lihat Semua
+              </b-link>
               <!-- <b-list-group v-for="(item, index) in items" :key="index">
                 <b-list-group-item href="#/layanan/keluhan/data" class="flex-column align-items-start" :style="item.status_notifikasi == 'Aktif' ? 'background-color:#E5E9F2' : ''">
                   <div class="d-flex w-100 justify-content-between">
@@ -151,6 +154,11 @@ export default {
     async getData() {
       let result = await axios().get('/notif/limit');
       this.items = result.data.values;
+    },
+    async getAll() {
+      let result = await axios().get('/notif/');
+      this.items = result.data.values;
+      document.getElementById('all').style.display = 'none';
     },
     async getCount() {
       let count = await axios().get('notif/count');
