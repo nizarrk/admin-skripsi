@@ -22,20 +22,20 @@ export default {
         {
           name: 'Data',
           url: '/layanan/keluhan/data',
-          icon: 'icon-cursor'
+          icon: 'fa fa-table'
         },
         {
           name: 'Map',
           url: '/layanan/keluhan/map',
-          icon: 'icon-map'
+          icon: 'fa fa-map-marked-alt'
         }
       ]
     },
-    {
-      name: 'Izin Penggunaan Jalan',
-      url: '/layanan/izin',
-      icon: 'fa fa-archive'
-    },
+    // {
+    //   name: 'Izin Penggunaan Jalan',
+    //   url: '/layanan/izin',
+    //   icon: 'fa fa-archive'
+    // },
     {
       title: true,
       name: 'Informasi',
@@ -51,10 +51,24 @@ export default {
       icon: 'fa fa-newspaper-o',
     },
     {
-      name: 'Trayek',
-      url: '/info/trayek',
-      icon: 'fa fa-bus',
+      title: true,
+      name: 'Pengguna',
+      class: '',
+      wrapper: {
+        element: '',
+        attributes: {}
+      }
     },
+    {
+      name: 'User',
+      url: '/pengguna/user',
+      icon: 'fa fa-users'
+    },
+    // {
+    //   name: 'Trayek',
+    //   url: '/info/trayek',
+    //   icon: 'fa fa-bus',
+    // },
     // {
     //   name: 'Perparkiran',
     //   url: '/info/parkir',
@@ -75,7 +89,7 @@ export default {
         {
           name: 'Master',
           url: '/survey/master',
-          icon: 'icon-cursor'
+          icon: 'fa fa-database'
         },
         {
           name: 'Survey',
@@ -85,7 +99,7 @@ export default {
         {
           name: 'Hasil',
           url: '/survey/hasil',
-          icon: 'fa fa-folder'
+          icon: 'fa fa-poll'
         }
       ]
     },

@@ -15,23 +15,25 @@
             </template>
             <div style="width: 400px;">
               <b-dropdown-item 
-              v-for="(item, index) in items" :key="index" 
-              :style="item.status_notifikasi == 'Aktif' ? 'background-color:#E5E9F2' : ''"
-              @click="updateStatus(item.id_notifikasi, item.tipe_notifikasi == 'Laporan Keluhan' ? 'lapor' : 'izin')">
+                v-for="(item, index) in items" :key="index" 
+                :class="item.status == 0 ? 'notif-new' : ''"
+                :style="item.status == 0 ? 'background-color:#E5E9F2' : ''"
+                @click="updateStatus(item.id, item.type == 'Laporan Keluhan' ? 'lapor' : 'izin')">
+
                 <div class="flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{item.tipe_notifikasi}}</h5>
-                    <small>{{timeDifference(item.tgl_notifikasi)}}</small>
+                    <h5 class="mb-1">{{item.type}}</h5>
+                    <small>{{timeDifference(item.created_at)}}</small>
                   </div>
                   <p class="mb-1">
-                    Pemberitahuan baru dari <b>{{item.nama_user_notifikator}}</b>.
+                    Pemberitahuan baru dari <b>{{item.originator.name}}</b>.
                   </p>
-                  <small>{{item.desk_notifikasi}}</small>
+                  <small>{{item.description}}</small>
                 </div>
               </b-dropdown-item>
-              <b-link id="all" @click="getAll">
+              <!-- <b-link  id="all" @click="getAll">
                 Lihat Semua
-              </b-link>
+              </b-link> -->
               <!-- <b-list-group v-for="(item, index) in items" :key="index">
                 <b-list-group-item href="#/layanan/keluhan/data" class="flex-column align-items-start" :style="item.status_notifikasi == 'Aktif' ? 'background-color:#E5E9F2' : ''">
                   <div class="d-flex w-100 justify-content-between">
@@ -44,7 +46,7 @@
                   <small>{{item.desk_notifikasi}}</small>
                 </b-list-group-item>
               </b-list-group> -->
-              <!-- <b-button block variant="primary">Lihat Semua</b-button> -->
+              <b-button block variant="default" @click="openNotif">Lihat Semua</b-button>
               </div>
           </b-dropdown>
         </b-nav-item>
@@ -137,12 +139,10 @@ export default {
       try {
         if (type == 'lapor') {
           this.$router.push('/layanan/keluhan/data');
-        } else if (type == 'izin') {
-          this.$router.push('/layanan/izin');
         }
 
-        await axios().put('/notif/' + id, {
-          status: 'Tidak Aktif'
+        await axios().put('/notification/status/' + id, {
+          status: 1
         });
 
         this.getData();
@@ -152,17 +152,16 @@ export default {
       }
     },
     async getData() {
-      let result = await axios().get('/notif/limit');
-      this.items = result.data.values;
+      let result = await axios().get('/notification/get?limit=5&page=1&order_by=id&order_direction=desc');
+      this.items = result.data.data.data;
     },
-    async getAll() {
-      let result = await axios().get('/notif/');
-      this.items = result.data.values;
-      document.getElementById('all').style.display = 'none';
+    openNotif() {
+      this.$router.push('/notifikasi');
     },
+
     async getCount() {
-      let count = await axios().get('notif/count');
-      this.count = count.data.values[0].count;
+      let count = await axios().get('notification/count');
+      this.count = count.data.data;
     }
   },
   mixins: [date]

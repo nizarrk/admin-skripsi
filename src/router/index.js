@@ -23,6 +23,11 @@ const Parkir = () => import('@/views/info/parkir');
 const Survey = () => import('@/views/survey/survey');
 const SurveyMaster = () => import('@/views/survey/survey-master');
 const SurveyHasil = () => import('@/views/survey/survey-hasil');
+const User = () => import('@/views/user/user');
+const Notifikasi = () => import('@/views/notifications/notifikasi');
+const Redirect = () => import('@/views/pages/Redirect');
+const ResetPassword = () => import('@/views/pages/ResetPassword');
+const Verified = () => import('@/views/pages/Verified');
 
 Vue.use(Router)
 
@@ -72,12 +77,12 @@ const router = new Router({
                 },
               ]
             },
-            {
-              path: 'izin',
-              name: 'Izin',
-              component: Izin,
-              meta: { requiresAuth: true }
-            }
+            // {
+            //   path: 'izin',
+            //   name: 'Izin',
+            //   component: Izin,
+            //   meta: { requiresAuth: true }
+            // }
           ]
         },
         {
@@ -94,18 +99,40 @@ const router = new Router({
               component: Info,
               meta: { requiresAuth: true }
             },
+            // {
+            //   path: 'trayek',
+            //   name: 'Trayek',
+            //   component: Trayek,
+            //   meta: { requiresAuth: true }
+            // },
+            // {
+            //   path: 'parkir',
+            //   name: 'Parkir',
+            //   component: Parkir,
+            //   meta: { requiresAuth: true }
+            // },
+          ]
+        },
+        {
+          path: 'pengguna',
+          redirect: '/pengguna/user',
+          name: 'Pengguna',
+          component: {
+            render (c) { return c('router-view') }
+          },
+          children: [
             {
-              path: 'trayek',
-              name: 'Trayek',
-              component: Trayek,
+              path: 'user',
+              name: 'User',
+              component: User,
               meta: { requiresAuth: true }
-            },
-            {
-              path: 'parkir',
-              name: 'Parkir',
-              component: Parkir,
-              meta: { requiresAuth: true }
-            },
+            }
+            // {
+            //   path: 'data',
+            //   name: 'Data',
+            //   component: Survey,
+            //   meta: { requiresAuth: true }
+            // }
           ]
         },
         {
@@ -142,6 +169,12 @@ const router = new Router({
           component: Kritik,
           meta: { requiresAuth: true }
         },
+        {
+          path: 'notifikasi',
+          name: 'Notifikasi',
+          component: Notifikasi,
+          meta: { requiresAuth: true }
+        },
       ]
     },
     {
@@ -171,14 +204,31 @@ const router = new Router({
           path: 'register',
           name: 'Register',
           component: Register
+        },
+        {
+          path: 'redirect',
+          name: 'Redirect',
+          component: Redirect
+        },
+        {
+          path: 'reset-password/:id',
+          name: 'Reset Password',
+          component: ResetPassword
+        },
+        {
+          path: 'verified/:id',
+          name: 'Verified',
+          component: Verified
         }
       ]
-    }
+    },
+    // default page not found
+    { path: "*", component: Page404 }
   ]
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
+  if (to.matched.some(record => record.meta.requiresAuth == true)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (localStorage.getItem('jwt') == null) {

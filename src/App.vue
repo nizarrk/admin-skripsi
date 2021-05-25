@@ -18,12 +18,12 @@ export default {
       let decode = this.$jwt.decode();
       console.log('decode', decode);
 
-      if (decode == null) {
-        this.$router.push('/pages/login');
-        localStorage.removeItem('jwt');
-      }
+      // if (decode == null) {
+      //   this.$router.push('/pages/login');
+      //   localStorage.removeItem('jwt');
+      // }
 
-      if (decode.exp < Date.now() / 1000) {
+      if (decode && decode.exp < Date.now() / 1000) {
         localStorage.removeItem('jwt');
         this.$router.push('/pages/login');
       } else {

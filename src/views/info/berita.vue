@@ -5,27 +5,27 @@
     <b-row v-for="(article, index) in groupedArticles" :key="index">
         <b-col v-for="(item, index) in items.slice(index * 3, (index + 1) * 3)" :key="index">
             <b-card
-                :title="item.judul_info"
-                :sub-title="formatTgl(item.tgl_info)"
-                :img-src="baseURL + item.foto_info"
+                :title="item.name"
+                :sub-title="formatTgl(item.created_at)"
+                :img-src="baseURL + item.image"
                 img-alt="Image"
                 img-top
                 tag="article"
                 style="max-width: 20rem;"
                 class="mb-2"
             >
-                <b-card-text v-if="item.desk_info.length > 300">
-                    {{item.desk_info | limitToDisplay(item.desk_info)}}
+                <b-card-text v-if="item.description.length > 300">
+                    {{item.description | limitToDisplay(item.description)}}
                 </b-card-text>
                 <b-card-text v-else>
-                    {{item.desk_info}}
+                    {{item.description}}
                 </b-card-text>
 
                 <div class="mt-3">
                     <b-button-group>
-                      <b-button v-b-tooltip.hover title="Lihat" class="fa fa-window-maximize" variant="info" @click="openModal('see', item.id_info)"></b-button>
-                      <b-button v-b-tooltip.hover title="Edit" class="fa fa-edit" variant="warning" @click="openModal('edit', item.id_info)"></b-button>
-                      <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('del', item.id_info)"></b-button>
+                      <b-button v-b-tooltip.hover title="Lihat" class="fa fa-eye" variant="primary" @click="openModal('see', item.id)"></b-button>
+                      <b-button v-b-tooltip.hover title="Edit" class="fa fa-edit" variant="warning" style="color: white;" @click="openModal('edit', item.id)"></b-button>
+                      <b-button v-b-tooltip.hover title="Hapus" class="fa fa-trash" variant="danger" @click="openModal('del', item.id)"></b-button>
                     </b-button-group>
                 </div>
             </b-card>
@@ -37,10 +37,10 @@
     </b-modal>
     <!-- Modal See -->
     <b-modal size="lg" id="modal-see" hide-footer hide-header>
-      <b-card :title="form.judul" :sub-title="formatTgl(form.tgl)">
+      <b-card :title="form.judul" :sub-title="formatTgl(form.tgl) + ' | Oleh: ' + form.author">
         <i class="float-right fa fa-close" style="cursor:pointer; margin-top: -50px;" @click="$bvModal.hide('modal-see')"></i>
         <center>
-          <img :src="baseURL + imagePreview" alt="image" style="max-width: 400px; max-height: 400px;">
+          <img :src="baseURL + imagePreview" alt="image" style="max-width: 400px; max-height: 400px; margin-bottom: 10px;">
         </center>
         <b-card-text>
           {{form.desk}}
@@ -149,18 +149,20 @@ export default {
             this.baseURL = baseURL.config.baseURL;
             this.getData();            
         } catch (error) {
-            console.log(error.messasge);
+            console.log(error.response);
+            this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');console.log(error.messasge);
         }
     },
     methods: {
       async getData() {
           try {
-              let result = await axios().get('/info');
-              console.log(result);
+              let result = await axios().get('/info/get');
+              console.log(result.data.data);
 
-              this.items = result.data.values;
+              this.items = result.data.data;
           } catch (error) {
-              console.log(error.messasge);
+              console.log(error.response);
+              this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           }
       },
       makeToast(text, title, variant = null) {
@@ -172,18 +174,18 @@ export default {
       },
       async openModal(type, id) {
           try {
-            let result = await axios().get('/info/' + id);
+            let result = await axios().get('/info/id/' + id);
             if (type == 'del') {
-              this.form.id = result.data.values[0].id_info;
+              this.form.id = result.data.data.id;
               this.$bvModal.show('modal-delete');
             } else if (type == 'see') {
-              this.form.id = result.data.values[0].id_info;
-              this.form.judul = result.data.values[0].judul_info;
-              this.form.desk = result.data.values[0].desk_info;
-              this.form.author = result.data.values[0].author_info;
-              this.form.kat = result.data.values[0].kat_info;
-              this.form.tgl = result.data.values[0].tgl_info;
-              this.imagePreview = result.data.values[0].foto_info;
+              this.form.id = result.data.data.id;
+              this.form.judul = result.data.data.name;
+              this.form.desk = result.data.data.description;
+              this.form.author = result.data.data.created_by;
+              this.form.kat = result.data.data.category;
+              this.form.tgl = result.data.data.created_at;
+              this.imagePreview = result.data.data.image;
               this.$bvModal.show('modal-see');
             } else if (type == 'add') {
               this.form.id = '';
@@ -196,20 +198,20 @@ export default {
               this.showPreview = false;
               this.$bvModal.show('modal-edit');
             } else if (type == 'edit') {           
-              this.form.id = result.data.values[0].id_info;
-              this.form.judul = result.data.values[0].judul_info;
-              this.form.desk = result.data.values[0].desk_info;
-              this.form.author = result.data.values[0].author_info;
-              this.form.kat = result.data.values[0].kat_info;
-              this.form.tgl = result.data.values[0].tgl_info;
-              this.imagePreview = result.data.values[0].foto_info;
+              this.form.id = result.data.data.id;
+              this.form.judul = result.data.data.name;
+              this.form.desk = result.data.data.description;
+              this.form.author = result.data.data.created_by;
+              this.form.kat = result.data.data.category;
+              this.form.tgl = result.data.data.created_at;
+              this.imagePreview = result.data.data.image;
               this.showPreview = true;
               
               this.$bvModal.show('modal-edit');         
             }          
           } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
           }
         },
@@ -225,7 +227,6 @@ export default {
             let formData = new FormData();
 
             /*Add the form data we need to submit*/
-            formData.append('id', this.form.id);
             formData.append('judul', this.form.judul);
             formData.append('fotoInfo', this.file);
             formData.append('desk', this.form.desk);
@@ -237,7 +238,7 @@ export default {
                 console.log(pair[0]+ ': ' + pair[1]); 
             }
             if (type == 'edit') {
-              await axios().put('/info', formData);
+              await axios().put('/info/edit/' + this.form.id, formData);
               this.file = null;
               
               
@@ -249,7 +250,7 @@ export default {
               this.makeToast(`Berhasil mengubah pertanyaan ${this.form.id}`, 'Berhasil', 'success');
               this.getData();
               } else if (type = 'add') {
-                await axios().post('/info', formData);
+                await axios().post('/info/add', formData);
                 this.file = null;
                 // Hide the modal manually
                 this.$nextTick(() => {
@@ -259,8 +260,8 @@ export default {
                 this.getData();
               }
             } catch (error) {
-            console.log(error.message);
-            this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+              console.log(error.response);
+              this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
             
             }        
         },
@@ -301,13 +302,13 @@ export default {
       },
       async deleteInfo(id){
         try {
-          await axios().delete('/info/' + id);
+          await axios().put('/info/remove/' + id);
           this.getData();
           this.makeToast(`Berhasil menghapus berita ${id}`, 'Berhasil', 'success');
           
         } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
         }
       }

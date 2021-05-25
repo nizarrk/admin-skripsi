@@ -1,33 +1,58 @@
 <template>
     <div class="animated fadeIn">
         <b-container fluid>
-            <div>
+            <div class="mb-1">
                 <b-form inline>
-                    <span
-                    @click="clearSearch"
-                    v-show="search != ''"
-                    class="fa fa-close" 
-                    style="cursor: pointer; color: #F86C6B;  position: absolute; left: 415px;"
-                    ></span>
-                    <b-input
-                    v-model="search"
-                    id="inline-form-input-cari"
+                    <b-form-select
                     class="mb-2 mr-sm-2 mb-sm-0"
-                    placeholder="Cari lokasi atau wilayah"
+                        v-model="search.selected"
+                        :options="search.opt"
+                        required
+                    ></b-form-select>
+
+                    <b-input
+                        v-show="search.selected == 'Lokasi'"
+                        v-model="search.query"
+                        id="inline-form-input-cari"
+                        class="mb-2 mr-sm-2 mb-sm-0"
+                        placeholder="Cari"
+                        required
                     ></b-input>
 
+                    <b-form-select
+                        v-show="search.selected == 'Jenis'"
+                        class="mb-2 mr-sm-2 mb-sm-0"
+                        v-model="search.jenis.selected"
+                        :options="search.jenis.opt"
+                        required
+                    ></b-form-select>
+
+                    <b-form-select
+                        v-show="search.selected == 'Status'"
+                        class="mb-2 mr-sm-2 mb-sm-0"
+                        v-model="search.status.selected"
+                        :options="search.status.opt"
+                        required
+                    ></b-form-select>
+
+                    <b-form-datepicker id="start-datepicker" v-show="search.selected == 'Tanggal'" v-model="search.dates.start" class="mb-2 mr-sm-2 mb-sm-0"></b-form-datepicker>
+                    <div v-show="search.selected == 'Tanggal'" class="mb-2 mr-sm-2 mb-sm-0"> - </div> 
+                    <b-form-datepicker id="end-datepicker" v-show="search.selected == 'Tanggal'" v-model="search.dates.end" class="mb-2 mr-sm-2 mb-sm-0"></b-form-datepicker>
+
                     <b-button variant="primary" @click="cari"><i class="fa fa-search"></i></b-button>
+                    <b-button class="ml-1" v-show="showDismissibleAlert == true" variant="danger" @click="clearSearch"><i class="fa fa-times"></i></b-button>
                 </b-form>
+                <!-- <b-alert v-show="search.status == true" class="mb-2 mr-sm-2 mb-sm-0" variant="success" show><b>{{totalRows}}</b> Laporan ditemukan!</b-alert> -->
             </div>
             <b-card>
                 <b-alert 
-                variant="success"  
+                :variant="search.found > 0 ? 'success' : 'warning'"   
                 :show="showDismissibleAlert"
                 dismissible
                 fade
                 @dismissed="showDismissibleAlert=false"
                 >
-                    Ditemukan <b>{{totalRows}}</b> laporan keluhan
+                    Ditemukan <b>{{search.found}}</b> laporan keluhan
                 </b-alert>
                 <l-map style="height: 500px;" id="map" ref="myMap" :zoom="zoom" :center="center">
                     <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
@@ -50,44 +75,42 @@
                                     <span><b>Nama Pelapor:</b> {{marker.nama}}</span><br>
                                     <span><b>Alamat Pelapor:</b> {{marker.alamat}}</span><br>
                                     <span><b>Telp Pelapor:</b> {{marker.telp}}</span><br>
+                                    <span><b>Kecamatan:</b> {{marker.kec}}</span><br>
                                     <span><b>Lokasi:</b> {{marker.loc}}</span><br>
                                     <span>
                                         <b>Status:</b>
-                                        <b-badge v-show="marker.status == 'Menunggu'" variant="warning">{{marker.status}}</b-badge>
-                                        <b-badge v-show="marker.status == 'Proses'" variant="primary">{{marker.status}}</b-badge>
-                                        <b-badge v-show="marker.status == 'Selesai'" variant="success">{{marker.status}}</b-badge>
-                                        <b-badge v-show="marker.status == 'Ditolak'" variant="danger">{{marker.status}}</b-badge>
+                                        <b-badge v-show="marker.status == 0" variant="warning">Pending</b-badge>
+                                        <b-badge v-show="marker.status == 1" variant="primary">Proses</b-badge>
+                                        <b-badge v-show="marker.status == 2" variant="success">Selesai</b-badge>
+                                        <b-badge v-show="marker.status == 3" variant="danger">Ditolak</b-badge>
                                     </span>
                                 </b-col>
                             </b-row>
                         </l-popup>
                     </l-marker>
                 </l-map>
-                <div style="padding-top: 10px;">
-                    <center>
-                    <table cellpadding="0" cellspacing="0" border="0">
-                        <tbody>
-                            <tr>      
-                                <td><b-badge variant="light">Jumlah Laporan Keluhan</b-badge></td>      
-                                <td width="30" align="center"><b>:</b></td>      
-                                <td width="60"><b-badge variant="warning">Menunggu</b-badge></td>      
-                                <td width="60"><b>:</b> <b-badge variant="default">{{totalMenunggu}}</b-badge></td>      
-                                <td width="60"><b-badge variant="primary">Proses</b-badge></td>      
-                                <td width="50"><b>:</b> <b-badge variant="default">{{totalProses}}</b-badge></td>      
-                                <td width="60"><b-badge variant="success">Selesai</b-badge></td>      
-                                <td width="40"><b>:</b> <b-badge variant="default">{{totalSelesai}}</b-badge></td>
-                                <td width="60"><b-badge variant="danger">Ditolak</b-badge></td>      
-                                <td width="40"><b>:</b> <b-badge variant="default">{{totalDitolak}}</b-badge></td>
-                            </tr>
-                            <tr>      
-                                <td><b-badge variant="light">Total Laporan Keluhan</b-badge></td>      
-                                <td align="center"><b>:</b></td>
-                                <td><b-badge variant="default">{{totalRows}}</b-badge></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </center>
-                </div>
+                <b-row class="text-center mt-2">
+                    <b-col style="text-align: right" cols="4">
+                        <b-badge variant="light">Total</b-badge>
+                        <b>:</b> <b-badge variant="default">{{totalRows}}</b-badge>
+                    </b-col>
+                    <b-col>
+                        <b-badge variant="warning">Pending</b-badge>      
+                        <b>:</b> <b-badge variant="default">{{totalMenunggu}}</b-badge> 
+                    </b-col>
+                    <b-col>
+                        <b-badge variant="primary">Proses</b-badge>      
+                        <b>:</b> <b-badge variant="default">{{totalProses}}</b-badge>      
+                    </b-col>
+                    <b-col>
+                        <b-badge variant="success">Selesai</b-badge>      
+                        <b>:</b> <b-badge variant="default">{{totalSelesai}}</b-badge>
+                    </b-col>
+                    <b-col style="text-align:left" cols="4">
+                        <b-badge variant="danger">Ditolak</b-badge>      
+                        <b>:</b> <b-badge variant="default">{{totalDitolak}}</b-badge>
+                    </b-col>
+                </b-row>
             </b-card>
             <!-- Modal Img -->
             <div id="myModal" class="modal">
@@ -102,6 +125,7 @@
 <script>
 import {LMap, LTileLayer, LMarker, LPopup} from 'vue2-leaflet';
 import axios from '@/config/axiosConfig';
+import moment from 'moment';
 
 export default {
     components: {
@@ -127,7 +151,27 @@ export default {
             totalSelesai: 0,
 
             showDismissibleAlert: false,
-            search: ''
+
+            // search box
+            search: {
+                query: '',
+                found: 0,
+                selected: 'Lokasi',
+                opt: ['Lokasi', 'Jenis', 'Status', 'Tanggal'],
+                dates: {
+                    start: new Date(),
+                    end: new Date()
+                },
+                jenis: {
+                    selected: 'Penerangan Jalan Umum (PJU)',
+                    opt: ['Penerangan Jalan Umum (PJU)', 'Traffic Light', 'Rambu Lalu Lintas', 'Marka Jalan', 'Cermin Tikungan', 'Perlengkapan JKalan Lainnya']
+                },
+                status: {
+                    selected: '0',
+                    opt: [{ text: 'Pending', value: '0' }, { text: 'Proses', value: 1 }, { text: 'Selesai', value: 2 }, { text: 'Ditolak', value: 3 }]
+
+                }
+            }
         }
     },
     async created() {
@@ -143,26 +187,33 @@ export default {
         async getData() {
             try {
                 let marker = null;
-                let result = await axios().get('/lapor/getall');
-                this.totalMenunggu = result.data.values[0].total_menunggu;
-                this.totalProses = result.data.values[0].total_proses;
-                this.totalSelesai = result.data.values[0].total_selesai;
-                this.totalDitolak = result.data.values[0].total_ditolak;
+                let result = await axios().get('/report/get');
+                this.totalMenunggu = result.data.data[0].total_menunggu;
+                this.totalProses = result.data.data[0].total_proses;
+                this.totalSelesai = result.data.data[0].total_selesai;
+                this.totalDitolak = result.data.data[0].total_ditolak;
                 
-                result.data.values.map((e, i) => {
-                    marker = {
-                        lat: e.lat_lapor, 
-                        lng: e.long_lapor, 
-                        loc: e.lokasi_lapor, 
-                        foto: e.foto_lapor, 
-                        nama: e.nama_user, 
-                        alamat: e.alamat_user, 
-                        telp: e.telp_user,
-                        status: e.status_lapor,
-                        desk: e.desk_lapor
+                this.markers = await Promise.all(
+                    result.data.data.map((e, i) => {
+                        marker = {
+                            lat: e.latitude, 
+                            lng: e.longitude, 
+                            loc: e.location, 
+                            kec: e.district,
+                            foto: e.image, 
+                            nama: e.name, 
+                            alamat: e.address, 
+                            telp: e.phone,
+                            status: e.status,
+                            desk: e.description,
+                            level: e.level_note,
+                            reject: e.reject_note
                         };
-                    this.markers.push(marker)
-                });
+
+                            return marker;
+                    })
+                );
+
                 this.totalRows = this.markers.length
                 console.log(this.markers);
             } catch (error) {
@@ -179,41 +230,50 @@ export default {
         },
         async cari() {
             try {
-                console.log(this.search);
+                if (this.search.selected == 'Tanggal') this.search.query =  moment(this.search.dates.start).format('YYYY-MM-DD') + ',' + moment(this.search.dates.end).format('YYYY-MM-DD');
+                if (this.search.selected == 'Jenis') this.search.query = this.search.jenis.selected;
+                if (this.search.selected == 'Status') this.search.query = this.search.status.selected;
                 
-                if (this.search == '') {
-                    this.markers = [];
+                if (this.search.query == '') {
+                    this.showDismissibleAlert == false;
                     this.getData();
                 } else {
-                    this.markers = [];
-                    let marker = null;
-                    let result = await axios().get('/lapor/searchloc/' + this.search);
-                    result.data.values.map((e, i) => {
-                        marker = {
-                            lat: e.lat_lapor, 
-                            lng: e.long_lapor, 
-                            loc: e.lokasi_lapor, 
-                            foto: e.foto_lapor, 
-                            nama: e.nama_user, 
-                            alamat: e.alamat_user, 
-                            telp: e.telp_user,
-                            status: e.status_lapor,
-                            desk: e.desk_lapor
-                        };
-                        this.markers.push(marker)
-                    })
                     this.showDismissibleAlert = true;
-                    this.totalRows = this.markers.length
-                    console.log(result.data.values);
+                    let result = await axios().get(`/report/search/?type=${this.search.selected}&q=${this.search.query}`);
+                    this.markers = await Promise.all(
+                        result.data.data.map((e, i) => {
+                            let marker = {
+                                lat: e.latitude, 
+                                lng: e.longitude, 
+                                loc: e.location, 
+                                kec: e.district,
+                                foto: e.image, 
+                                nama: e.name, 
+                                alamat: e.address, 
+                                telp: e.phone,
+                                status: e.status,
+                                desk: e.description,
+                                level: e.level_note,
+                                reject: e.reject_note
+                            };
+
+                                return marker;
+                        })
+                    );
+
+                    console.log(this.markers);
+
+                    this.search.found = this.markers.length
                 }
             } catch (error) {
-                console.log(error.message);
-                
+                console.log(error);
+                this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');     
             }
         },
         clearSearch() {
             this.markers = [];
-            this.search = '';
+            this.showDismissibleAlert = false;
+            this.search.query = '';
             this.getData();
         },
         modalImg(img, desk) {

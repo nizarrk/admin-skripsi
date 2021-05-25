@@ -2,7 +2,7 @@
 <div class="animated fadeIn">
   <b-container fluid>
     <b-card title="Pertanyaan Survey">
-      <b-button style="margin-bottom: 5px;" class="float-right" variant="danger" @click="deleteAll">Hapus Semua Survey</b-button><br>
+      <b-button style="margin-bottom: 5px;" class="float-right" variant="danger" @click="openModal()">Hapus Semua Survey</b-button><br>
         <!-- Main table element -->
         <b-table
         show-empty
@@ -17,11 +17,11 @@
         :sort-direction="sortDirection"
         @filtered="onFiltered"
         >
-          <template slot="no" slot-scope="row">
+          <!-- <template slot="no" slot-scope="row">
               {{ row.index + 1}}
-          </template>
+          </template> -->
 
-          <template slot="actions" slot-scope="row">
+          <template #cell(actions)="row">
             <div class="mt-3">
               <b-button-group>
                 <b-button 
@@ -29,7 +29,7 @@
                 title="Edit" 
                 class="fa fa-edit" 
                 variant="warning" 
-                @click="openModal('edit', row.item.id_pertanyaan_survey, row.item.id_jawaban1, row.item.id_jawaban2,row.item.id_jawaban3,  row.item.id_jawaban4)"
+                @click="openModal('edit', row.item.id)"
                 >
                 </b-button>
                 <b-button 
@@ -37,7 +37,7 @@
                 title="Hapus" 
                 class="fa fa-trash" 
                 variant="danger" 
-                @click="openModal('del', row.item.id_pertanyaan_survey)"
+                @click="openModal('del', row.item.id)"
                 >
                 </b-button>
               </b-button-group>
@@ -60,6 +60,10 @@
     <!-- Modal Delete -->
     <b-modal okTitle='Ya' cancelTitle='Tidak' okVariant='danger' id="modal-delete" title="Konfirmasi" @ok="deleteSurvey(formedit.id)">
       <p class="my-4">Apakah anda yakin menghapus pertanyaan {{formedit.id}}?</p>
+    </b-modal>
+    <!-- Modal Delete All -->
+    <b-modal okTitle='Ya' cancelTitle='Tidak' okVariant='danger' id="modal-delete-all" title="Konfirmasi" @ok="deleteAll()">
+      <p class="my-4">Apakah anda yakin menghapus semua pertanyaan?</p>
     </b-modal>
     <!-- Modal Add -->
     <b-modal okTitle='Ya' cancelTitle='Tidak' id="modal-add" title="Konfirmasi" @ok="addSurvey(formedit.id)">
@@ -153,8 +157,8 @@ import axios from '@/config/axiosConfig';
       return {
         items: [],
         fields: [
-          { key: 'no', label: 'No.', sortDirection: 'desc' },
-          { key: 'pertanyaan_survey', label: 'Pertanyaan' },
+          // { key: 'no', label: 'No.', sortDirection: 'desc' },
+          { key: 'question', label: 'Pertanyaan' },
           { key: 'jawaban1', label: 'Jawaban A'},
           { key: 'jawaban2', label: 'Jawaban B'},
           { key: 'jawaban3', label: 'Jawaban C'},
@@ -211,34 +215,39 @@ import axios from '@/config/axiosConfig';
     },
     methods: {
       async getData() {
-        let result = await axios().get('/survey/list'); 
-        console.log(result.data);
-        this.items = result.data.values;
+        try {
+          let result = await axios().get('/survey/get'); 
+          console.log(result.data.data);
+          this.items = result.data.data;
         
-        // Set the initial number of items
-        this.totalRows = this.items.length
+          // Set the initial number of items
+          this.totalRows = this.items.length 
+        } catch (error) {
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
+        }
       },
       async deleteSurvey(id){
         try {
-          await axios().delete('/survey/list/' + id);
+          await axios().delete('/survey/remove/' + id);
           this.getData();
           this.makeToast(`Berhasil menghapus survey ${id}`, 'Berhasil', 'success');
           
         } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
         }
       },
       async deleteAll(){
         try {
-          await axios().delete('/survey/list');
+          await axios().delete('/survey/remove/all');
           this.getData();
           this.makeToast(`Berhasil menghapus semua survey`, 'Berhasil', 'success');
           
         } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
         }
       },
@@ -256,29 +265,33 @@ import axios from '@/config/axiosConfig';
       },
       async openModal(type, id, jwb1, jwb2, jwb3, jwb4) {
         try {
-          let result = await axios().get('/survey/list/' + id);
-          console.log(result);
-          
-          this.formedit.pertanyaan = result.data.values[0].pertanyaan_survey;
-          this.formedit.jawabanA = result.data.values[0].jawaban1;
-          this.formedit.jawabanB = result.data.values[0].jawaban2;
-          this.formedit.jawabanC = result.data.values[0].jawaban3;
-          this.formedit.jawabanD = result.data.values[0].jawaban4;
-          this.formedit.id = result.data.values[0].id_pertanyaan_survey;
-          this.formedit.idjwb1 = result.data.values[0].id_jawaban1;
-          this.formedit.idjwb2 = result.data.values[0].id_jawaban2;
-          this.formedit.idjwb3 = result.data.values[0].id_jawaban3;
-          this.formedit.idjwb4 = result.data.values[0].id_jawaban4;
-          if (type == 'del') {
-            this.$bvModal.show('modal-delete');
-          } else if (type == 'add') {
-            this.$bvModal.show('modal-add');
-          } else if (type == 'edit') {
-            this.$bvModal.show('modal-edit');         
-          }          
+          if (!id) {
+            this.$bvModal.show('modal-delete-all');
+          } else {
+            let result = await axios().get('/survey/id/' + id);
+            console.log(result.data.data);
+            
+            this.formedit.pertanyaan = result.data.data.question;
+            this.formedit.jawabanA = result.data.data.jawaban1;
+            this.formedit.jawabanB = result.data.data.jawaban2;
+            this.formedit.jawabanC = result.data.data.jawaban3;
+            this.formedit.jawabanD = result.data.data.jawaban4;
+            this.formedit.id = result.data.data.id;
+            this.formedit.idjwb1 = result.data.data.id_jawaban1;
+            this.formedit.idjwb2 = result.data.data.id_jawaban2;
+            this.formedit.idjwb3 = result.data.data.id_jawaban3;
+            this.formedit.idjwb4 = result.data.data.id_jawaban4;
+            if (type == 'del') {
+              this.$bvModal.show('modal-delete');
+            } else if (type == 'add') {
+              this.$bvModal.show('modal-add');
+            } else if (type == 'edit') {
+              this.$bvModal.show('modal-edit');         
+            }  
+          }        
         } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
         }
       },
@@ -290,8 +303,7 @@ import axios from '@/config/axiosConfig';
       },
       async handleSubmit() {
         try {
-          let update = await axios().put('/survey/list', {
-                id: this.formedit.id,
+          let update = await axios().put('/survey/edit/' + this.formedit.id, {
                 idjwb1: this.formedit.idjwb1,
                 idjwb2: this.formedit.idjwb2,
                 idjwb3: this.formedit.idjwb3,
@@ -309,8 +321,8 @@ import axios from '@/config/axiosConfig';
           this.makeToast(`Berhasil mengubah pertanyaan ${this.formedit.id}`, 'Berhasil', 'success');
           this.getData();
         } catch (error) {
-          console.log(error.message);
-          this.makeToast(error.message, 'Terjadi Kesalahan', 'danger');
+          console.log(error.response);
+          this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
           
         }        
       }

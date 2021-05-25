@@ -2,7 +2,7 @@
   <AppHeaderDropdown right no-caret>
     <template slot="header">
       <img
-        :src="baseURL + profile.foto_user"
+        :src="baseURL + profile.picture"
         class="img-avatar"
         alt="admin" />
     </template>\
@@ -10,11 +10,11 @@
       <b-dropdown-header
         tag="div"
         class="text-center">
-        <strong>Settings</strong>
+        <strong>Menu</strong>
       </b-dropdown-header>
-      <!-- <b-dropdown-item><i class="fa fa-user" /> Profile</b-dropdown-item>
-      <b-dropdown-item><i class="fa fa-wrench" /> Settings</b-dropdown-item>
-      <b-dropdown-divider /> -->
+      <!-- <b-dropdown-item><i class="fa fa-user" /> Profile</b-dropdown-item> -->
+      <b-dropdown-item @click="openNotif"><i class="fa fa-bell" /> Notifikasi</b-dropdown-item>
+      <b-dropdown-divider />
       <b-dropdown-item @click="logOut"><i class="fa fa-lock" /> Logout</b-dropdown-item>
     </template>
   </AppHeaderDropdown>
@@ -38,13 +38,17 @@ export default {
     let baseURL = await axios().request();
     this.baseURL = baseURL.config.baseURL;
     let result = await axios().get('user/profile');
-    this.profile = result.data.values[0];
+    this.profile = result.data.data;
   },
   methods: {
     logOut() {
       localStorage.removeItem('jwt');
       this.$router.push('/pages/login');
-    }
+    },
+
+    openNotif() {
+      this.$router.push('/notifikasi');
+    },
   }
 }
 </script>

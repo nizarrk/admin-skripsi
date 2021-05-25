@@ -16,11 +16,11 @@
                 :sort-direction="sortDirection"
                 @filtered="onFiltered"
                 >
-                <template slot="no" slot-scope="row">
+                <!-- <template slot="no" slot-scope="row">
                     {{row.index + 1}}
-                </template>
+                </template> -->
                 
-                <template slot="tgl_kritiksaran" slot-scope="row">
+                <template #cell(created_at)="row">
                     {{formatTglFull(row.value)}}
                 </template>
 
@@ -47,12 +47,11 @@ export default {
     data() {
         return {
             items: [],
-            fields: [
-                { key: 'no', label: 'No.', sortDirection: 'desc' },
-                { key: 'nama_user', label: 'Nama User' },
-                { key: 'rate_kritiksaran', label: 'Rate'},
-                { key: 'desk_kritiksaran', label: 'Kritik & Saran'},
-                { key: 'tgl_kritiksaran', label: 'Tanggal'}
+            fields: [   
+                { key: 'user.name', label: 'Nama User' },
+                { key: 'rate', label: 'Rate'},
+                { key: 'description', label: 'Kritik & Saran'},
+                { key: 'created_at', label: 'Tanggal'}
             ],
             totalRows: 1,
             currentPage: 1,
@@ -66,11 +65,19 @@ export default {
     },
     async created() {
         try {
-            let result = await axios().get('/kritik');
-            this.items = result.data.values;
+            let result = await axios().get('/critic/get');
+            this.items = result.data.data;
         } catch (error) {
-            
+            console.log(error.response);
+            this.makeToast(error.response.data.message, 'Terjadi Kesalahan', 'danger');
         }
+    },
+    makeToast(text, title, variant = null) {
+        this.$bvToast.toast(text, {
+        title: title,
+        variant: variant,
+        solid: true
+        })
     },
     mixins : [date]
 }
